@@ -1,4 +1,4 @@
-#!/bin/python3
+#!/usr/bin/env python3
 import os
 # Import the template 
 import template 
@@ -15,7 +15,8 @@ env_string = ""
 for e in os.environ:
   env_string += "{}={}\n".format(e, os.environ[e])
 
-archive_path = settings.archive_path
+base_dir = os.path.dirname(os.path.abspath(__file__))
+archive_path = os.path.join(base_dir, settings.archive_path)
 entry_path = os.environ['var_entry_path']
 
 archive = Archive(archive_path)

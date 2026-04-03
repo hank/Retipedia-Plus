@@ -1,4 +1,4 @@
-#!/bin/python3
+#!/usr/bin/env python3
 import os
 # Import the template 
 import template
@@ -11,7 +11,8 @@ from libzim.suggestion import SuggestionSearcher
 
 ### Setup ###
 # Import archive_path from settings
-archive_path = settings.archive_path
+base_dir = os.path.dirname(os.path.abspath(__file__))
+archive_path = os.path.join(base_dir, settings.archive_path)
 zim = Archive(archive_path)
 
 # Get variables from input fields

@@ -2,6 +2,7 @@ import os
 from bs4 import BeautifulSoup
 import re
 import sys
+from urllib.parse import unquote
 import settings
 
 
@@ -18,9 +19,13 @@ def format_link(a_tag):
     # Use href if available otherwise, use the link's text
     href = a_tag.get('href', a_tag.text).strip()
     text = a_tag.text.strip()
-    path = f'A/{text.replace(" ", "_").title()}'
+    # Decode URL encoding and strip fragment identifiers
+    href = unquote(href).split('#')[0]
+    # If href is empty (was an anchor-only link like #cite_ref-1) render as plain text
+    if not href:
+        return text if text else "-"
     # Format as micron link with blue text
-    if(text):
+    if text:
         return f'`F00f`_`[{text}`:/page/{settings.root_folder}/entry.mu`entry_path={href}]`_`f'
     else:
         return "-"
@@ -28,8 +33,8 @@ def format_link(a_tag):
 def clean_html(soup):
     # References and external links for some articles can be quite long and will be on their own seperate page isolated from the main article content. 
     reference_section_attributes = [
-        "sidebar-list"
-        "reflist   ",
+        "sidebar-list",
+        "reflist",
         "mw-references-wrap",
         "references",
         "mw-reference-columns",
@@ -92,8 +97,19 @@ def html_to_micron(html_content):
             # regex for html tags
             cleaned_paragraph = re.sub('<[^<]+?>', '', paragraph_text)
             micron_document += cleaned_paragraph.strip() + '\n\n'
-        # handle direct links outside paragraphs or headers
-        elif element.name == 'a' and element.parent and element.parent.name not in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p']:
+        elif element.name == 'li':
+            # convert list items like paragraphs, prepend a bullet
+            item_text = ''
+            for content in element.contents:
+                if content.name == 'a':
+                    item_text += format_link(content)
+                else:
+                    item_text += str(content)
+            cleaned_item = re.sub('<[^<]+?>', '', item_text).strip()
+            if cleaned_item:
+                micron_document += f'• {cleaned_item}\n'
+        # handle direct links outside paragraphs, headers, or inline containers
+        elif element.name == 'a' and element.parent and element.parent.name not in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'li', 'b', 'i', 'em', 'strong', 'span', 'u']:
             micron_document += format_link(element) + '\n\n'
 
     return micron_document
