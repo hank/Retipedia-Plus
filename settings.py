@@ -10,3 +10,8 @@ node_title = "🬧 The NomadNet WikiCiv"
 
 # The LXMF address of the Node operator - this is an optional field that can be toggled on / off to display on the about page
 lxmf_address = False
+
+# Path to the directory containing ZIM binary files.
+# Meta sidecar files (.zim.meta) live in the zims/ subdirectory alongside the code.
+# ZIM binaries can live anywhere — set this to wherever you store them.
+zims_dir = "/space/retipedia/zims"

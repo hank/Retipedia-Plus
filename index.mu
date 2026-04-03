@@ -7,18 +7,18 @@ import settings
 print(template.header)
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
-zims_dir = os.path.join(base_dir, 'zims')
+meta_dir = os.path.join(base_dir, 'zims')
 root = settings.root_folder
 
-zim_files = sorted(f for f in os.listdir(zims_dir) if f.endswith('.zim'))
+zim_files = sorted(f for f in os.listdir(settings.zims_dir) if f.endswith('.zim'))
 
 if not zim_files:
-    print("No ZIM archives found in the zims/ directory.")
+    print("No ZIM archives found.")
 else:
     print(">Available Archives")
     print()
     for zim_file in zim_files:
-        meta_path = os.path.join(zims_dir, zim_file + '.meta')
+        meta_path = os.path.join(meta_dir, zim_file + '.meta')
         if os.path.exists(meta_path):
             with open(meta_path) as f:
                 meta = json.load(f)

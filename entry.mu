@@ -8,7 +8,7 @@ from formatting import wikipedia
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
 zim_name = os.environ['var_zim']
-archive_path = os.path.join(base_dir, 'zims', zim_name)
+archive_path = os.path.join(settings.zims_dir, zim_name)
 entry_path = os.environ['var_entry_path']
 
 archive = Archive(archive_path)

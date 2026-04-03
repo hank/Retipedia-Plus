@@ -9,7 +9,7 @@ from libzim.reader import Archive
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
 zim_name = os.environ['var_zim']
-archive_path = os.path.join(base_dir, 'zims', zim_name)
+archive_path = os.path.join(settings.zims_dir, zim_name)
 root = settings.root_folder
 
 archive = Archive(archive_path)
