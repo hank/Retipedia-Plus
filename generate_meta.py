@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-Generate a .meta sidecar JSON file for a ZIM archive.
-Usage: ./generate_meta.py path/to/file.zim
+Generate .meta sidecar JSON files for ZIM archives.
+Scans settings.zims_dir for all .zim files without existing .meta files.
+Usage: ./generate_meta.py
 """
 
 import sys
@@ -107,28 +108,13 @@ def get_description(archive, zim_type):
     return ''
 
 
-def main():
-    if len(sys.argv) < 2:
-        print(f"Usage: {sys.argv[0]} path/to/file.zim", file=sys.stderr)
-        sys.exit(1)
-
-    zim_path = sys.argv[1]
-    if not os.path.isfile(zim_path):
-        print(f"File not found: {zim_path}", file=sys.stderr)
-        sys.exit(1)
-
-    # Meta files live in the retipedia/zims/ directory alongside the code, not with the ZIM binary.
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    meta_dir = os.path.join(script_dir, 'zims')
-    os.makedirs(meta_dir, exist_ok=True)
+def process_zim(zim_path, meta_dir):
     meta_path = os.path.join(meta_dir, os.path.basename(zim_path) + '.meta')
-
     if os.path.isfile(meta_path):
-        print(f"Meta already exists: {meta_path}", file=sys.stderr)
-        print("Delete it first or edit it manually.", file=sys.stderr)
-        sys.exit(1)
+        print(f"  Skipping (meta exists): {os.path.basename(zim_path)}")
+        return
 
-    print(f"Opening {zim_path}...")
+    print(f"  Processing: {os.path.basename(zim_path)}")
     archive = Archive(zim_path)
 
     zim_type = detect_type(archive)
@@ -142,15 +128,31 @@ def main():
         'description': description or f'{entry_count} articles',
     }
 
-    print(f"  Title:       {meta['title']}")
-    print(f"  Type:        {meta['type']}")
-    print(f"  Description: {meta['description']}")
-    print(f"  Writing:     {meta_path}")
+    print(f"    Title:       {meta['title']}")
+    print(f"    Type:        {meta['type']}")
+    print(f"    Description: {meta['description']}")
 
     with open(meta_path, 'w') as f:
         json.dump(meta, f, indent=2)
         f.write('\n')
 
+
+def main():
+    import settings
+    zims_dir = settings.zims_dir
+
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    meta_dir = os.path.join(script_dir, 'zims')
+    os.makedirs(meta_dir, exist_ok=True)
+
+    zim_files = sorted(f for f in os.listdir(zims_dir) if f.endswith('.zim'))
+    if not zim_files:
+        print(f"No ZIM files found in {zims_dir}")
+        return
+
+    print(f"Scanning {zims_dir} ({len(zim_files)} ZIM files)...")
+    for zim_file in zim_files:
+        process_zim(os.path.join(zims_dir, zim_file), meta_dir)
     print("Done.")
 
 
