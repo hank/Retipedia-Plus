@@ -5,15 +5,11 @@ from libzim.reader import Archive
 from libzim.search import Query, Searcher
 from libzim.suggestion import SuggestionSearcher
 
-ascii_art = r"""`c`F09f
-  ____           _     _                      _   _
- |  _ \\    ___  | |_  (_)  _ __     ___    __| | (_)   __ _
- | |_) |  / _ \\ | __| | | | '_ \\   / _ \\  / _`` | | | |  / _``   |
- |  _ <  |  __/ | |_  | | | |_) | |  __/ | (_| | | | | (_| |
- |_| \\_\\  \\___|  \\__| |_| | .__/   \\___|  \\__,_| |_|  \\__,_|
-                          |_|
-
-`f``"""
+ascii_art = """`c
+`F09f █▀█ █▀▀ ▀█▀ █ █▀▄ █▀▀ █▀▄ █ ▄▀▄
+`F0cf █▀▄ █▀   █  █ █▀▀ █▀  █ █ █ █▀█
+`F09f ▀ ▀ ▀▀▀  ▀  ▀ ▀   ▀▀▀ ▀▀▀ ▀ ▀ ▀
+`f"""
 
 
 search_icon = "🔍"
