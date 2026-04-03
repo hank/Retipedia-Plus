@@ -46,7 +46,7 @@ else:
                         featured.append((title, href))
             break
 
-    # --- Parse Main Topics ---
+    # --- Parse Main Topics (Wikipedia <b>-in-<td> style) ---
     categories = []
     seen_cats = set()
     for b_tag in mw_output.find_all('b'):
@@ -67,6 +67,29 @@ else:
                         items.append((label, href))
                 if items:
                     categories.append((cat_name, items))
+
+    # --- Parse Main Topics (toccolours/mw-collapsible style) ---
+    if not categories:
+        for block in mw_output.find_all('div', class_='toccolours'):
+            h2 = block.find('h2')
+            cat_name = h2.get_text().strip() if h2 else None
+            if not cat_name or cat_name in seen_cats:
+                continue
+            seen_cats.add(cat_name)
+            content_div = block.find('div', class_='mw-collapsible-content')
+            if not content_div:
+                continue
+            items = []
+            for a in content_div.find_all('a'):
+                href = a.get('href', '').strip()
+                label = a.get_text().strip()
+                if not label or not href or href.startswith('http'):
+                    continue
+                href = unquote(href).split('#')[0]
+                if href and label:
+                    items.append((label, href))
+            if items:
+                categories.append((cat_name, items))
 
     # --- Render ---
     if featured:
