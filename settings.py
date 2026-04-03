@@ -3,11 +3,6 @@
 # You can adjust htis if you want it to point at somewhere else outside of the parent folder 
 root_folder = "retipedia"
 
-# The full path to the .zim archive 
-archive_path = "wikiciv_en_all_maxi_2025-11.zim" 
-# What type of .zim archive the node is hosting - currently supported: wikipedia, gutenberg
-archive_type = "wikipedia"
-
 # Node settings
 ascii_art_enabled = True # Do you want to print an ASCII splash at the top? (Can save a small amount of time on page load if set to "False")
 

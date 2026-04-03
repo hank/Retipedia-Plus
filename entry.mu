@@ -1,22 +1,13 @@
 #!/usr/bin/env python3
 import os
-# Import the template 
-import template 
-# Import global settings 
+import template
 import settings
-# Import libzim
 from libzim.reader import Archive
-from libzim.search import Searcher, Query
-from libzim.suggestion import SuggestionSearcher
 from formatting import wikipedia
 
-# Get variables from input field 
-env_string = ""
-for e in os.environ:
-  env_string += "{}={}\n".format(e, os.environ[e])
-
 base_dir = os.path.dirname(os.path.abspath(__file__))
-archive_path = os.path.join(base_dir, settings.archive_path)
+zim_name = os.environ['var_zim']
+archive_path = os.path.join(base_dir, 'zims', zim_name)
 entry_path = os.environ['var_entry_path']
 
 archive = Archive(archive_path)
@@ -25,19 +16,12 @@ try:
     entry = archive.get_entry_by_path(entry_path)
     entry_title = entry.title
     item = entry.get_item()
-    content = bytes(item.content)
-    text_content = content.decode('utf-8')
-    
-    # Header
-    print(template.header)
+    text_content = bytes(item.content).decode('utf-8')
 
-    
-    # Main content
+    print(template.make_header(zim=zim_name))
     print(f">{entry_title}")
-    # Convert the Wikipedia HTML formatting contained within the .zim to Micron
-    micron_content = wikipedia.html_to_micron(text_content)
-    print(micron_content)
-    
-except KeyError:  
-    print(template.header)
+    print(wikipedia.html_to_micron(text_content, zim_name))
+
+except KeyError:
+    print(template.make_header(zim=zim_name))
     print("Can't find entry")

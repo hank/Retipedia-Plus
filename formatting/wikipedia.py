@@ -8,14 +8,7 @@ import settings
 
 # Formatting for Wikipedia archives in .zim format provided by the Kiwix project
 
-# Get the env variables
-env_string = ""
-for e in os.environ:
-  env_string += "{}={}\n".format(e, os.environ[e])
-  
-archive_path = settings.archive_path
-
-def format_link(a_tag):
+def format_link(a_tag, zim_name):
     # Use href if available otherwise, use the link's text
     href = a_tag.get('href', a_tag.text).strip()
     text = a_tag.text.strip()
@@ -26,12 +19,12 @@ def format_link(a_tag):
         return text if text else "-"
     # Format as micron link with blue text
     if text:
-        return f'`F00f`_`[{text}`:/page/{settings.root_folder}/entry.mu`entry_path={href}]`_`f'
+        return f'`F00f`_`[{text}`:/page/{settings.root_folder}/entry.mu`zim={zim_name}|entry_path={href}]`_`f'
     else:
         return "-"
 
 def clean_html(soup):
-    # References and external links for some articles can be quite long and will be on their own seperate page isolated from the main article content. 
+    # References and external links for some articles can be quite long and will be on their own seperate page isolated from the main article content.
     reference_section_attributes = [
         "sidebar-list",
         "reflist",
@@ -70,39 +63,34 @@ def clean_html(soup):
         citation.decompose()
 
 
-def html_to_micron(html_content):
+def html_to_micron(html_content, zim_name):
     soup = BeautifulSoup(html_content, 'html.parser')
-    clean_html(soup)  # Clean the HTML
+    clean_html(soup)
 
     micron_document = ''
 
     # Process each element
     for element in soup.body.find_all(True):  # True gets all tags
         if element.name in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
-            # Determine the level of the header for Micron format
             level = int(element.name[1])
             header_mark = '>' * level
-            # Replace each link in the header
             for a in element.find_all('a'):
-                a.replace_with(format_link(a))
+                a.replace_with(format_link(a, zim_name))
             micron_document += f"{header_mark}{element.get_text(strip=True)}\n\n"
         elif element.name == 'p':
-            # convert paragraphs and replace inline links with micron links
             paragraph_text = ''
             for content in element.contents:
                 if content.name == 'a':
-                    paragraph_text += format_link(content)
+                    paragraph_text += format_link(content, zim_name)
                 else:
                     paragraph_text += str(content)
-            # regex for html tags
             cleaned_paragraph = re.sub('<[^<]+?>', '', paragraph_text)
             micron_document += cleaned_paragraph.strip() + '\n\n'
         elif element.name == 'li':
-            # convert list items like paragraphs, prepend a bullet
             item_text = ''
             for content in element.contents:
                 if content.name == 'a':
-                    item_text += format_link(content)
+                    item_text += format_link(content, zim_name)
                 else:
                     item_text += str(content)
             cleaned_item = re.sub('<[^<]+?>', '', item_text).strip()
@@ -110,8 +98,6 @@ def html_to_micron(html_content):
                 micron_document += f'• {cleaned_item}\n'
         # handle direct links outside paragraphs, headers, or inline containers
         elif element.name == 'a' and element.parent and element.parent.name not in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'li', 'b', 'i', 'em', 'strong', 'span', 'u']:
-            micron_document += format_link(element) + '\n\n'
+            micron_document += format_link(element, zim_name) + '\n\n'
 
     return micron_document
-
-
