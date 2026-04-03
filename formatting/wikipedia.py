@@ -69,8 +69,11 @@ def html_to_micron(html_content, zim_name):
 
     micron_document = ''
 
+    # Scope to mw-parser-output if present to avoid page chrome (title, nav, etc.)
+    root = soup.find('div', class_='mw-parser-output') or soup.body
+
     # Process each element
-    for element in soup.body.find_all(True):  # True gets all tags
+    for element in root.find_all(True):  # True gets all tags
         if element.name in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
             level = int(element.name[1])
             header_mark = '>' * level
