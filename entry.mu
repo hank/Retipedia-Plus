@@ -42,7 +42,7 @@ try:
             print()
             print("`F888This entry requires JavaScript to render and cannot be displayed in a text browser.`f")
         else:
-            print(wikipedia.html_to_micron(text_content, zim_name))
+            print(wikipedia.html_to_micron(text_content, zim_name, item.path))
 
 except KeyError:
     print(template.make_header(zim=zim_name))

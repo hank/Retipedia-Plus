@@ -1,4 +1,5 @@
 import os
+import posixpath
 from bs4 import BeautifulSoup
 import re
 import sys
@@ -8,7 +9,7 @@ import settings
 
 # Formatting for Wikipedia archives in .zim format provided by the Kiwix project
 
-def format_link(a_tag, zim_name):
+def format_link(a_tag, zim_name, entry_dir=''):
     # Use href if available otherwise, use the link's text
     href = a_tag.get('href', a_tag.text).strip()
     text = a_tag.text.strip()
@@ -17,7 +18,13 @@ def format_link(a_tag, zim_name):
     # If href is empty (was an anchor-only link like #cite_ref-1) render as plain text
     if not href:
         return text if text else "-"
-    # Format as micron link with blue text
+    # Skip external links — render as plain text
+    if href.startswith('http://') or href.startswith('https://'):
+        return text if text else "-"
+    # Resolve relative paths (e.g. ../tags/drink) against the current entry's directory
+    if entry_dir and not href.startswith('/'):
+        href = posixpath.normpath(posixpath.join(entry_dir, href)).lstrip('/')
+    # Format as micron link
     if text:
         return f'`F00f`_`[{text}`:/page/{settings.root_folder}/entry.mu`zim={zim_name}|entry_path={href}]`_`f'
     else:
@@ -63,9 +70,12 @@ def clean_html(soup):
         citation.decompose()
 
 
-def html_to_micron(html_content, zim_name):
+def html_to_micron(html_content, zim_name, entry_path=''):
     soup = BeautifulSoup(html_content, 'html.parser')
     clean_html(soup)
+
+    # entry_dir is the directory portion of the entry path for resolving relative links
+    entry_dir = entry_path.rsplit('/', 1)[0] + '/' if '/' in entry_path else ''
 
     micron_document = ''
 
@@ -78,13 +88,13 @@ def html_to_micron(html_content, zim_name):
             level = int(element.name[1])
             header_mark = '>' * level
             for a in element.find_all('a'):
-                a.replace_with(format_link(a, zim_name))
+                a.replace_with(format_link(a, zim_name, entry_dir))
             micron_document += f"{header_mark}{element.get_text(strip=True)}\n\n"
         elif element.name == 'p':
             paragraph_text = ''
             for content in element.contents:
                 if content.name == 'a':
-                    paragraph_text += format_link(content, zim_name)
+                    paragraph_text += format_link(content, zim_name, entry_dir)
                 else:
                     paragraph_text += str(content)
             cleaned_paragraph = re.sub('<[^<]+?>', '', paragraph_text)
@@ -93,7 +103,7 @@ def html_to_micron(html_content, zim_name):
             item_text = ''
             for content in element.contents:
                 if content.name == 'a':
-                    item_text += format_link(content, zim_name)
+                    item_text += format_link(content, zim_name, entry_dir)
                 else:
                     item_text += str(content)
             cleaned_item = re.sub('<[^<]+?>', '', item_text).strip()
@@ -101,6 +111,6 @@ def html_to_micron(html_content, zim_name):
                 micron_document += f'• {cleaned_item}\n'
         # handle direct links outside paragraphs, headers, or inline containers
         elif element.name == 'a' and element.parent and element.parent.name not in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'li', 'b', 'i', 'em', 'strong', 'span', 'u']:
-            micron_document += format_link(element, zim_name) + '\n\n'
+            micron_document += format_link(element, zim_name, entry_dir) + '\n\n'
 
     return micron_document
