@@ -28,7 +28,12 @@ else:
             title = zim_file.replace('_', ' ').replace('.zim', '')
             description = ''
 
-        print(f'  `F0ff`_`[{title}`:/page/{root}/zim_index.mu`zim={zim_file}]`_`f')
+        zim_type = meta.get('type', 'generic') if os.path.exists(meta_path) else 'generic'
+        if zim_type == 'wikipedia':
+            link_url = f':/page/{root}/entry.mu`zim={zim_file}|entry_path=Main_Page'
+        else:
+            link_url = f':/page/{root}/zim_index.mu`zim={zim_file}'
+        print(f'  `F0ff`_`[{title}`{link_url}]`_`f')
         if description:
             print(f'  `F777{description}`f')
         print()
