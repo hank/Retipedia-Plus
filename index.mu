@@ -41,6 +41,13 @@ else:
 
 # --- Books (EPUBs) ---
 epub_files = sorted(f for f in os.listdir(settings.epubs_dir) if f.endswith('.epub'))
+# --- Bible ---
+print(">Bible")
+print()
+print(f'  `F0ff`_`[Legacy Standard Bible`:/page/{root}/bible_index.mu]`_`f')
+print(f'  `F777Literal translation — OT & NT`f')
+print()
+
 if epub_files:
     print(">Books")
     print()
