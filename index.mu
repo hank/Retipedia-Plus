@@ -3,6 +3,7 @@ import os
 import json
 import template
 import settings
+from formatting.epub import get_spine
 
 print(template.header)
 
@@ -36,4 +37,22 @@ else:
         print(f'  `F0ff`_`[{title}`{link_url}]`_`f')
         if description:
             print(f'  `F777{description}`f')
+        print()
+
+# --- Books (EPUBs) ---
+epub_files = sorted(f for f in os.listdir(settings.epubs_dir) if f.endswith('.epub'))
+if epub_files:
+    print(">Books")
+    print()
+    for epub_file in epub_files:
+        try:
+            metadata, spine = get_spine(os.path.join(settings.epubs_dir, epub_file))
+            title = metadata['title']
+            author = metadata['author']
+        except Exception:
+            title = epub_file.replace('_', ' ').replace('.epub', '')
+            author = ''
+        print(f'  `F0ff`_`[{title}`:/page/{root}/epub_index.mu`epub={epub_file}]`_`f')
+        if author:
+            print(f'  `F777{author}`f')
         print()

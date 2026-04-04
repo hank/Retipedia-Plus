@@ -15,3 +15,6 @@ lxmf_address = False
 # Meta sidecar files (.zim.meta) live in the zims/ subdirectory alongside the code.
 # ZIM binaries can live anywhere — set this to wherever you store them.
 zims_dir = "/space/retipedia/zims"
+
+# Path to the directory containing EPUB books.
+epubs_dir = "/space/retipedia/epubs"
