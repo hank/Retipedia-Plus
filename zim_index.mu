@@ -25,9 +25,28 @@ print(f">`!{zim_title}`!")
 print()
 
 if mw_output is None:
-    # Non-MediaWiki ZIM — no structured index to parse, search is the way in
-    print("`F888This archive does not have a structured index.")
-    print("Use the search bar above to find content.`f")
+    # Non-MediaWiki ZIM — extract links directly from main page body
+    root_el = soup.body or soup
+    links = []
+    seen = set()
+    for a in root_el.find_all('a', href=True):
+        href = a.get('href', '').strip()
+        label = a.get_text().strip()
+        if not label or not href or href.startswith('http') or href.startswith('#'):
+            continue
+        href = unquote(href).lstrip('./')
+        if href and label and href not in seen:
+            seen.add(href)
+            links.append((label, href))
+
+    if links:
+        print(f">Browse ({len(links)} entries)")
+        print()
+        for label, href in links:
+            print(f'  `F0ff`_`[{label}`:/page/{root}/entry.mu`zim={zim_name}|entry_path={href}]`_`f')
+    else:
+        print("`F888This archive does not have a structured index.")
+        print("Use the search bar above to find content.`f")
 else:
     # --- Parse Featured Articles ---
     featured = []
