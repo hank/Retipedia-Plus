@@ -26,6 +26,8 @@ print()
 
 if mw_output is None:
     # Non-MediaWiki ZIM — extract links directly from main page body
+    # Resolve relative links against the main page's directory path
+    main_dir = item.path.rsplit('/', 1)[0] + '/' if '/' in item.path else ''
     root_el = soup.body or soup
     links = []
     seen = set()
@@ -34,7 +36,10 @@ if mw_output is None:
         label = a.get_text().strip()
         if not label or not href or href.startswith('http') or href.startswith('#'):
             continue
-        href = unquote(href).lstrip('./')
+        href = unquote(href)
+        if not href.startswith('/'):
+            href = main_dir + href
+        href = href.lstrip('/')
         if href and label and href not in seen:
             seen.add(href)
             links.append((label, href))
